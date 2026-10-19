@@ -1,0 +1,42 @@
+# SwiftUIで画面を作る
+
+## 背景
+
+商品一覧が長くなり、会員から「飲み物だけ見たい」という声が届いています。商品一覧の画面に、**カテゴリの絞り込み** を追加します。
+
+## やること
+
+### 1. ViewModel（`SakuraMartKit/Sources/SakuraMartKit/ProductListViewModel.swift`）
+
+| 追加するもの | 内容 |
+| --- | --- |
+| `categories: [String]` | 読み込んだ商品のカテゴリを、最初に出てきた順に重複なく。読み込む前は空 |
+| `selectedCategory: String?` | 選んでいるカテゴリ。`nil` なら「すべて」。外からは読むだけ（変更は `select` で） |
+| `filteredProducts: [Product]` | 表示する商品。選んでいるカテゴリの商品だけ（`nil` ならすべて） |
+| `select(category: String?)` | カテゴリを選ぶ。`nil` なら「すべて」。`categories` にないカテゴリは選べない（変えない） |
+
+- 読み込み直して、選んでいたカテゴリの商品がなくなっていたら「すべて」に戻す。まだあれば、そのまま
+- 最初は「すべて」
+
+### 2. 画面（`SakuraMart/ProductListView.swift`）
+
+- 一覧の上に、カテゴリを選ぶボタン（「すべて」と、各カテゴリ）を横に並べる。選んでいるカテゴリが分かるようにする
+- 一覧には `filteredProducts` を表示し、いまのカテゴリと件数を表示する
+
+画面の部分は自動のテストでは判定しません。シミュレーターで動かして確認してください（上級では AI がレビューします）。
+
+## 受け入れ条件
+
+- [ ] ViewModel が上の仕様どおりに動く
+- [ ] 絞り込みのロジックは ViewModel に書き、View には書いていない
+- [ ] 画面でカテゴリを選ぶと、一覧が絞り込まれる（シミュレーターで確認）
+- [ ] 既存のテストがすべて通る
+
+## 参考
+
+- テスト: `SakuraMartKit/Tests/SakuraMartKitTests/Tasks/CategoryFilterTaskTests.swift`
+- Apple: SwiftUI Tutorials https://developer.apple.com/tutorials/swiftui
+
+---
+
+課題で用意したテストと `.github/` は変更しないでください。変更したPRは判定の対象外になります。
