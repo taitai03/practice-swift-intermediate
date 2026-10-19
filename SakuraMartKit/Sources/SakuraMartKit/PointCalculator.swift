@@ -11,6 +11,6 @@ public enum PointCalculator {
     /// taxIncluded は割引と消費税を反映した金額（送料を含まない）。端数は切り捨て
     public static func points(taxIncluded: Int, rank: MemberRank) -> Int {
         guard taxIncluded > 0 else { return 0 }
-        return taxIncluded * rate(for: rank) / 100
+        return Int((Double(taxIncluded) * Double(rate(for: rank)) / 100).rounded())
     }
 }
