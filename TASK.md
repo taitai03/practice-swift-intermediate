@@ -1,0 +1,48 @@
+# Swift Concurrency
+
+## 背景
+
+商品一覧に「在庫あり／在庫なし」を表示します。在庫は倉庫のシステムの別のAPI（`StockAPI`）から取得します。いまのまま商品と在庫を順番に取得すると、一覧が表示されるまでに時間がかかるので、**並列に** 取得してください。倉庫のシステムはときどき止まるので、そのときでも商品の一覧は表示したい、と言われています。
+
+## やること
+
+`SakuraMartKit/Sources/SakuraMartKit/CatalogLoader.swift` を作り、次を実装する。在庫のAPI（`StockAPI`、`StockInfo`、開発用の `MockStockAPI`）は `StockAPI.swift` にあります。
+
+### `CatalogItem`（`Identifiable`、`Equatable`）
+
+| プロパティ | 内容 |
+| --- | --- |
+| `product: Product` | 商品 |
+| `stock: Int?` | 在庫数。取れなかったときは `nil`（不明） |
+| `id: Int` | 商品のID |
+| `isInStock: Bool` | 在庫が1以上なら `true`。不明（`nil`）のときも `true`（買えないと決めつけない） |
+
+`init(product:stock:)` を作る。
+
+### `actor CatalogLoader`
+
+- `init(productAPI: ProductAPI, stockAPI: StockAPI)`
+- `load(forceRefresh: Bool = false) async throws -> [CatalogItem]`
+  - 商品（`fetchProducts`）と在庫（`fetchAllStock`）を **並列で** 取得し、商品の順に `CatalogItem` にする。在庫の一覧にない商品の在庫は `nil`
+  - 在庫の取得に失敗しても、商品は返す（在庫はすべて `nil`）。商品の取得に失敗したら、そのエラーを投げる
+  - 読み込んだ結果を `cachedItems` に覚え、次からは覚えている結果を返す。`forceRefresh: true` なら読み込み直す
+  - 読み込み中にキャンセルされたら `CancellationError` を投げ、結果を覚えない
+- `cachedItems: [CatalogItem]?`（外からは読むだけ）
+
+## 受け入れ条件
+
+- [ ] 商品と在庫を並列で取得してまとめる
+- [ ] 在庫が取れなくても商品は返し、商品が取れなければエラーにする
+- [ ] 結果を覚え、`forceRefresh` で読み込み直せる
+- [ ] 同時にたくさん呼ばれても正しく動く（actor）
+- [ ] キャンセルされたら `CancellationError` を投げ、結果を覚えない
+- [ ] 既存のテストがすべて通る
+
+## 参考
+
+- テスト: `SakuraMartKit/Tests/SakuraMartKitTests/Tasks/CatalogLoaderTaskTests.swift`
+- The Swift Programming Language: Concurrency https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency/
+
+---
+
+課題で用意したテストと `.github/` は変更しないでください。変更したPRは判定の対象外になります。
