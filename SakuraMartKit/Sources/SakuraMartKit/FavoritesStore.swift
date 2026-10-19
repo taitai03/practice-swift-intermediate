@@ -6,6 +6,8 @@ import Observation
 @Observable
 public final class FavoritesStore {
     static let storageKey = "favoriteProductIDs"
+    /// お気に入りに入れられる上限（2026/03 追加）
+    public static let maxCount = 100
 
     public private(set) var productIDs: Set<Int> = []
     private let store: KeyValueStore
@@ -22,14 +24,15 @@ public final class FavoritesStore {
         productIDs.contains(productID)
     }
 
-    /// お気に入りに入れる・外す
+    /// お気に入りに入れる・外す。上限を超えて入れようとしたら何もしない
     public func toggle(_ productID: Int) {
+        save()
         if productIDs.contains(productID) {
             productIDs.remove(productID)
         } else {
+            guard productIDs.count < Self.maxCount else { return }
             productIDs.insert(productID)
         }
-        save()
     }
 
     private func save() {
